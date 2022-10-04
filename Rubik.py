@@ -10,24 +10,6 @@ class Face:
         for i in range(3):
             self.tF[i] = [color] * 3
 
-        # ctr = 1
-        # for i in range(3):
-        #     self.tF[i] = [''] * 3
-        #     for j in range(3):
-        #         if color == "r":
-        #             self.tF[i][j] = '\u001b[31m' + str(ctr) + '\u001b[0m'
-        #         elif color == "g":
-        #             self.tF[i][j] = '\u001b[32m' + str(ctr) + '\u001b[0m'
-        #         elif color == 'w':
-        #             self.tF[i][j] = str(ctr)
-        #         elif color == 'b':
-        #             self.tF[i][j] = '\u001b[34m' + str(ctr) + '\u001b[0m'
-        #         elif color == 'y':
-        #             self.tF[i][j] = '\u001b[38;5;11m' + str(ctr) + '\u001b[0m'
-        #         elif color == 'o':
-        #             self.tF[i][j] = '\u001b[38;5;208m' + str(ctr) + '\u001b[0m'
-        #         ctr += 1
-
     def __str__(self):
         to_string = ""
         for i in self.tF:
@@ -110,7 +92,7 @@ class Cube:
                 colorize += '\u001b[38;5;208m■\u001b[0m'
             else:
                 colorize += to_string[i]
-        return colorize
+        return colorize + '\n'
         # return to_string
 
     def print_arr(self):
@@ -130,6 +112,7 @@ class Cube:
         return rseq
 
     def u(self):
+        """Rotate upper layer of cube clockwise"""
         tmp = self.tC[1].tF[0]
         self.tC[1].tF[0] = self.tC[2].tF[0]
         self.tC[2].tF[0] = self.tC[3].tF[0]
@@ -138,6 +121,7 @@ class Cube:
         self.tC[0].clockwise()
 
     def up(self):
+        """Rotate upper layer of cube counter clockwise"""
         tmp = self.tC[4].tF[0]
         self.tC[4].tF[0] = self.tC[3].tF[0]
         self.tC[3].tF[0] = self.tC[2].tF[0]
@@ -146,6 +130,7 @@ class Cube:
         self.tC[0].c_clockwise()
 
     def d(self):
+        """Rotate bottom layer of cube clockwise"""
         tmp = self.tC[4].tF[2]
         self.tC[4].tF[2] = self.tC[3].tF[2]
         self.tC[3].tF[2] = self.tC[2].tF[2]
@@ -154,6 +139,7 @@ class Cube:
         self.tC[5].clockwise()
 
     def dp(self):
+        """Rotate bottom layer of cube counter clockwise"""
         tmp = self.tC[1].tF[2]
         self.tC[1].tF[2] = self.tC[2].tF[2]
         self.tC[2].tF[2] = self.tC[3].tF[2]
@@ -162,6 +148,7 @@ class Cube:
         self.tC[5].c_clockwise()
 
     def r(self):
+        """Rotate right side of cube clockwise"""
         u = self.tC[0].tF[0][2]
         m = self.tC[0].tF[1][2]
         d = self.tC[0].tF[2][2]
@@ -185,6 +172,7 @@ class Cube:
         self.tC[3].clockwise()
 
     def rp(self):
+        """Rotate right side of cube counter clockwise"""
         u = self.tC[4].tF[0][0]
         m = self.tC[4].tF[1][0]
         d = self.tC[4].tF[2][0]
@@ -208,6 +196,7 @@ class Cube:
         self.tC[3].c_clockwise()
 
     def l(self):
+        """Rotate left side of cube clockwise"""
         u = self.tC[5].tF[0][0]
         m = self.tC[5].tF[1][0]
         d = self.tC[5].tF[2][0]
@@ -231,6 +220,7 @@ class Cube:
         self.tC[1].clockwise()
 
     def lp(self):
+        """Rotate left side of cube counter clockwise"""
         u = self.tC[0].tF[0][0]
         m = self.tC[0].tF[1][0]
         d = self.tC[0].tF[2][0]
@@ -254,6 +244,7 @@ class Cube:
         self.tC[1].c_clockwise()
 
     def f(self):
+        """Rotate face of cube clockwise"""
         u = self.tC[5].tF[0][0]
         m = self.tC[5].tF[0][1]
         d = self.tC[5].tF[0][2]
@@ -277,6 +268,7 @@ class Cube:
         self.tC[2].clockwise()
 
     def fp(self):
+        """Rotate face of cube counter clockwise"""
         u = self.tC[5].tF[0][0]
         m = self.tC[5].tF[0][1]
         d = self.tC[5].tF[0][2]
@@ -300,6 +292,7 @@ class Cube:
         self.tC[2].c_clockwise()
 
     def b(self):
+        """Rotate back side of cube clockwise"""
         u = self.tC[0].tF[0][0]
         m = self.tC[0].tF[0][1]
         d = self.tC[0].tF[0][2]
@@ -322,6 +315,7 @@ class Cube:
         self.tC[4].clockwise()
 
     def bp(self):
+        """Rotate back side of cube counter clockwise"""
         u = self.tC[0].tF[0][0]
         m = self.tC[0].tF[0][1]
         d = self.tC[0].tF[0][2]
@@ -344,60 +338,82 @@ class Cube:
 
         self.tC[4].c_clockwise()
 
+    def shuffle(self):
+        """Shuffles the cube randomly"""
+        shuffle_seq = ''
+
+        for i in range(20):
+            num = math.floor(random.random() * 12)
+            if num == 0:
+                self.u()
+                shuffle_seq += 'U '
+            elif num == 1:
+                self.up()
+                shuffle_seq += "U' "
+            elif num == 2:
+                self.d()
+                shuffle_seq += "D "
+            elif num == 3:
+                self.dp()
+                shuffle_seq += "D' "
+            elif num == 4:
+                self.l()
+                shuffle_seq += "L "
+            elif num == 5:
+                self.lp()
+                shuffle_seq += "L' "
+            elif num == 6:
+                self.r()
+                shuffle_seq += "R "
+            elif num == 7:
+                self.rp()
+                shuffle_seq += "R' "
+            elif num == 8:
+                self.f()
+                shuffle_seq += "F "
+            elif num == 9:
+                self.fp()
+                shuffle_seq += "F' "
+            elif num == 10:
+                self.b()
+                shuffle_seq += "B "
+            elif num == 11:
+                self.bp()
+                shuffle_seq += "B' "
+
+
+def compare(cube1, cube2):
+    score = 0
+
+    for i in range(6):
+        for j in range(3):
+            for k in range(3):
+                if(cube1.tC[i].tF[j][k] == cube2.tC[i].tF[j][k]):
+                    score += 1
+
+    return score
+
 
 def c_clockwise(a):
+    """Rotates 2D array counterclockwise"""
     return list(zip(*a))[::-1]
 
 
 def clockwise(a):
+    """Rotates 2D array clockwise"""
     return zip(*a[::-1])
 
-
-def shuffle(cube, num):
-    if num == 0:
-        cube.u()
-        return 'U'
-    elif num == 1:
-        cube.up()
-        return "U'"
-    elif num == 2:
-        cube.d()
-        return "D"
-    elif num == 3:
-        cube.dp()
-        return "D'"
-    elif num == 4:
-        cube.l()
-        return "L"
-    elif num == 5:
-        cube.lp()
-        return "L'"
-    elif num == 6:
-        cube.r()
-        return "R"
-    elif num == 7:
-        cube.rp()
-        return "R'"
-    elif num == 8:
-        cube.f()
-        return "F"
-    elif num == 9:
-        cube.fp()
-        return "F'"
-    elif num == 10:
-        cube.b()
-        return "B"
-    elif num == 11:
-        cube.bp()
-        return "B'"
-
-
 if __name__ == '__main__':
-    c = Cube()
-    shuffleseq = 'Shuffle sequence: '
-    for i in range(20):
-        n = math.floor(random.random() * 12)
-        move = shuffle(c, n)
-        shuffleseq += str(move) + ' '
-    print(c)
-    print(shuffleseq)
+    cube1 = Cube()
+    cube2 = Cube()
+
+    print(cube1)
+
+
+    cube2.u()
+
+
+    print(cube2)
+
+    print(compare(cube1, cube2))
+
