@@ -2,9 +2,12 @@ from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
 import random
+from stable_baselines3.common.env_checker import check_env
+from stable_baselines3 import PPO
 
 import Rubik
 from Rubik import *
+
 
 class RubiksEnv(Env):
     def move(self, action):
@@ -47,62 +50,89 @@ class RubiksEnv(Env):
             # print('bp')
 
     def __init__(self):
-        # Actions: u, u', d, d', l, l', r, r', f, f', b, b'
-        self.action_space = Discrete(12)
-        # 3D array
-        self.observation_space = Box(low=0, high=5, shape=(6, 3, 3), dtype=int)
-
+        self.done = False
+        self.moves_made = 0
         self.state = Rubik.Cube()
         self.state.shuffle()
 
-        self.moves = 100
+        self.previous_moves = []
+        self.previous_state = []
+        self.reward = 0
 
+        self.observation = [self.previous_moves]
+        self.observation = np.array(self.observation)
+        self.action_space = Discrete(12)
 
+        self.observation_space = Box(low=0, high=5, shape=(54, ), dtype=int)
 
     def step(self, action):
+
         self.move(action)
-        self.moves -= 1
+        self.moves_made += 1
+        self.previous_moves.append(action)
+        np.append(self.previous_state,(flattenCube(self.state)))
 
-        solvedCube = Rubik.Cube()
+        solved_cube = Rubik.Cube()
 
-        reward = Rubik.compare(solvedCube, self.state)
-
-        if reward == 54:
-            print('Solved!')
-
-        if self.moves <= 0:
-            done = True
+        if compare(self.state, solved_cube) == 54:
+            self.reward = 1
+            self.done = True
+        elif self.moves_made >= 100:
+            self.done = True
+            self.reward = compare(self.state, solved_cube)
+            self.reward = 0
         else:
-            done = False
+            self.reward = 0
 
-        info = {}
-
-        return self.state, reward, done, info
-
-    def render(self):
-        pass
-        # print(self.state)
+        np.append(self.observation, self.state)
+        info = {1: self.moves_made}
+        return self.observation, self.reward, self.done, info
 
     def reset(self):
+        # Initial scrambled cube state, moves allowed, and pevious move
+        self.done = False
+        self.moves_made = 0
         self.state = Rubik.Cube()
         self.state.shuffle()
 
-        self.moves = 100
+        self.previous_moves = [0]
+        self.previous_state = flattenCube(self.state)
+        self.reward = 0
+        # set observation to array of current cube state
+        self.observation = np.array(flattenCube(self.state))
 
-        return self.state
+        return self.observation
+
+    def render(self):
+        print(self.state)
+
 
 if __name__ == '__main__':
     env = RubiksEnv()
 
-    episodes = 10
-    for episode in range(1, episodes + 1):
-        state = env.reset()
+    # print(env.observation_space.sample())
+    # print(env.step(1))
+    # print(env.step(10))
+    # print(env.reset())
+    # check_env(env)
+
+    episodes = 100
+
+    PPO_Path = os.path.join('training', 'saved models', 'PPO_5_1R')
+    model = PPO.load(PPO_Path, env=env)
+
+    count = 0
+    for episode in range(1, episodes+1):
+        obs = env.reset()
         done = False
         score = 0
 
         while not done:
-            env.render()
-            action = env.action_space.sample()
-            n_state, reward, done, info = env.step(action)
-            score = reward
-        print ('Episode:{} Score:{}'.format(episode, score))
+            action, _ = model.predict(obs)
+            obs, reward, done, info = env.step(action)
+            score += reward
+        if score == 1:
+            count += 1
+        print('Episode:{} Score:{} Moves Made:{}'.format(episode, score, info.get(1)))
+
+    print(count/episodes)

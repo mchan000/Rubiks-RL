@@ -2,6 +2,7 @@ import os
 import random
 import math
 import time
+import numpy as np
 
 
 class Face:
@@ -342,8 +343,9 @@ class Cube:
         """Shuffles the cube randomly"""
         shuffle_seq = ''
 
-        for i in range(20):
+        for i in range(1):
             num = math.floor(random.random() * 12)
+            num = 5
             if num == 0:
                 self.u()
                 shuffle_seq += 'U '
@@ -403,17 +405,25 @@ def clockwise(a):
     """Rotates 2D array clockwise"""
     return zip(*a[::-1])
 
-if __name__ == '__main__':
-    cube1 = Cube()
-    cube2 = Cube()
+def flattenCube(c):
+    arr = []
 
-    print(cube1)
+    for i in range(6):
+        for j in range(3):
+            for k in range(3):
+                if c.tC[i].tF[j][k] == 'w':
+                    arr.append(0)
+                elif c.tC[i].tF[j][k] == 'o':
+                    arr.append(1)
+                elif c.tC[i].tF[j][k] == 'g':
+                    arr.append(2)
+                elif c.tC[i].tF[j][k] == 'r':
+                    arr.append(3)
+                elif c.tC[i].tF[j][k] == 'b':
+                    arr.append(4)
+                elif c.tC[i].tF[j][k] == 'y':
+                    arr.append(5)
 
 
-    cube2.u()
-
-
-    print(cube2)
-
-    print(compare(cube1, cube2))
+    return np.array(arr)
 
