@@ -94,23 +94,22 @@ class Cube:
             else:
                 colorize += to_string[i]
         return colorize + '\n'
-        # return to_string
 
-    def print_arr(self):
-        pseq = ''
-        rseq = ''
-        ctr = 1
-        for face in self.tC:
-            for row in face.tF:
-                for sqr in row:
-                    if ctr % 9 == 0:
-                        pseq += sqr + '\n'
-                    else:
-                        pseq += sqr + ' '
-                    rseq += sqr
-                    ctr += 1
-        print(pseq)
-        return rseq
+    # def print_arr(self):
+    #     pseq = ''
+    #     rseq = ''
+    #     ctr = 1
+    #     for face in self.tC:
+    #         for row in face.tF:
+    #             for sqr in row:
+    #                 if ctr % 9 == 0:
+    #                     pseq += sqr + '\n'
+    #                 else:
+    #                     pseq += sqr + ' '
+    #                 rseq += sqr
+    #                 ctr += 1
+    #     print(pseq)
+    #     return rseq
 
     def u(self):
         """Rotate upper layer of cube clockwise"""
@@ -342,46 +341,70 @@ class Cube:
     def shuffle(self):
         """Shuffles the cube randomly"""
         shuffle_seq = ''
-
-        for i in range(1):
+        last_move = 100
+        count = 0
+        # Shuffles 9 times
+        while count != 9:
             num = math.floor(random.random() * 12)
-            num = 5
-            if num == 0:
+            # num = 6
+
+            if num % 2 == 1:
+                while num == last_move - 1:
+                    num = math.floor(random.random() * 12)
+            if num % 2 == 0:
+                while num == last_move + 1:
+                    num = math.floor(random.random() * 12)
+
+            if num == 0 and last_move != 1:
                 self.u()
                 shuffle_seq += 'U '
-            elif num == 1:
+                count += 1
+            elif num == 1 and last_move != 0:
                 self.up()
                 shuffle_seq += "U' "
-            elif num == 2:
+                count += 1
+            elif num == 2 and last_move != 3:
                 self.d()
                 shuffle_seq += "D "
-            elif num == 3:
+                count += 1
+            elif num == 3 and last_move != 2:
                 self.dp()
                 shuffle_seq += "D' "
-            elif num == 4:
+                count += 1
+            elif num == 4 and last_move != 5:
                 self.l()
                 shuffle_seq += "L "
-            elif num == 5:
+                count += 1
+            elif num == 5 and last_move != 4:
                 self.lp()
                 shuffle_seq += "L' "
-            elif num == 6:
+                count += 1
+            elif num == 6 and last_move != 7:
                 self.r()
                 shuffle_seq += "R "
-            elif num == 7:
+                count += 1
+            elif num == 7 and last_move != 6:
                 self.rp()
                 shuffle_seq += "R' "
-            elif num == 8:
+                count += 1
+            elif num == 8 and last_move != 9:
                 self.f()
                 shuffle_seq += "F "
-            elif num == 9:
+                count += 1
+            elif num == 9 and last_move != 8:
                 self.fp()
                 shuffle_seq += "F' "
-            elif num == 10:
+                count += 1
+            elif num == 10 and last_move != 11:
                 self.b()
                 shuffle_seq += "B "
-            elif num == 11:
+                count += 1
+            elif num == 11 and last_move != 10:
                 self.bp()
                 shuffle_seq += "B' "
+                count += 1
+            last_move = num
+        return shuffle_seq
 
 
 def compare(cube1, cube2):
@@ -390,7 +413,7 @@ def compare(cube1, cube2):
     for i in range(6):
         for j in range(3):
             for k in range(3):
-                if(cube1.tC[i].tF[j][k] == cube2.tC[i].tF[j][k]):
+                if cube1.tC[i].tF[j][k] == cube2.tC[i].tF[j][k]:
                     score += 1
 
     return score
@@ -404,6 +427,7 @@ def c_clockwise(a):
 def clockwise(a):
     """Rotates 2D array clockwise"""
     return zip(*a[::-1])
+
 
 def flattenCube(c):
     arr = []
@@ -424,6 +448,4 @@ def flattenCube(c):
                 elif c.tC[i].tF[j][k] == 'y':
                     arr.append(5)
 
-
-    return np.array(arr)
-
+    return arr

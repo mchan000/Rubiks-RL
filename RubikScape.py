@@ -1,12 +1,11 @@
 from gym import Env
 from gym.spaces import Discrete, Box
 import numpy as np
-import random
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3 import PPO
 
 import Rubik
 from Rubik import *
+
+solved_cube = Rubik.Cube()
 
 
 class RubiksEnv(Env):
@@ -53,86 +52,89 @@ class RubiksEnv(Env):
         self.done = False
         self.moves_made = 0
         self.state = Rubik.Cube()
-        self.state.shuffle()
-
-        self.previous_moves = []
-        self.previous_state = []
+        #self.state.shuffle()
+        self.moves = []
         self.reward = 0
-
-        self.observation = [self.previous_moves]
-        self.observation = np.array(self.observation)
+        self.observation = np.array(flattenCube(self.state))
+        # Action space is 12 possible moves
         self.action_space = Discrete(12)
-
-        self.observation_space = Box(low=0, high=5, shape=(54, ), dtype=int)
+        self.observation_space = Box(low=0, high=5, shape=(54,), dtype=int)
 
     def step(self, action):
-
         self.move(action)
         self.moves_made += 1
-        self.previous_moves.append(action)
-        np.append(self.previous_state,(flattenCube(self.state)))
-
-        solved_cube = Rubik.Cube()
-
+        self.moves.append(action)
         if compare(self.state, solved_cube) == 54:
             self.reward = 1
             self.done = True
         elif self.moves_made >= 100:
             self.done = True
-            self.reward = compare(self.state, solved_cube)
-            self.reward = 0
+            self.reward = -1
         else:
             self.reward = 0
 
-        np.append(self.observation, self.state)
-        info = {1: self.moves_made}
+        self.observation = np.array(flattenCube(self.state))
+        info = {1: self.moves, 2: self.moves_made}
         return self.observation, self.reward, self.done, info
 
     def reset(self):
-        # Initial scrambled cube state, moves allowed, and pevious move
         self.done = False
         self.moves_made = 0
         self.state = Rubik.Cube()
-        self.state.shuffle()
-
-        self.previous_moves = [0]
-        self.previous_state = flattenCube(self.state)
+        #self.state.shuffle()
+        self.moves = []
         self.reward = 0
-        # set observation to array of current cube state
-        self.observation = np.array(flattenCube(self.state))
 
+        # Observation state is current shuffled rubik's cube state
+        self.observation = np.array(flattenCube(self.state))
+        return self.observation
+
+    def scramble(self, seq):
+        for i in seq:
+            self.move(i)
+        self.observation = np.array(flattenCube(self.state))
         return self.observation
 
     def render(self):
         print(self.state)
 
 
-if __name__ == '__main__':
-    env = RubiksEnv()
-
-    # print(env.observation_space.sample())
-    # print(env.step(1))
-    # print(env.step(10))
-    # print(env.reset())
-    # check_env(env)
-
-    episodes = 100
-
-    PPO_Path = os.path.join('training', 'saved models', 'PPO_5_1R')
-    model = PPO.load(PPO_Path, env=env)
-
-    count = 0
-    for episode in range(1, episodes+1):
-        obs = env.reset()
-        done = False
-        score = 0
-
-        while not done:
-            action, _ = model.predict(obs)
-            obs, reward, done, info = env.step(action)
-            score += reward
-        if score == 1:
-            count += 1
-        print('Episode:{} Score:{} Moves Made:{}'.format(episode, score, info.get(1)))
-
-    print(count/episodes)
+def convertToRNotation(arr):
+    notation = ""
+    for i in arr:
+        if i == 0:
+            notation += 'u '
+        elif i == 1:
+            # print('up')
+            notation += 'up '
+        elif i == 2:
+            # print('d')
+            notation += 'd '
+        elif i == 3:
+            # print('dp')
+            notation += 'dp '
+        elif i == 4:
+            # print('l')
+            notation += 'l '
+        elif i == 5:
+            # print('lp')
+            notation += 'lp '
+        elif i == 6:
+            # print('r')
+            notation += 'r '
+        elif i == 7:
+            # print('rp')
+            notation += 'rp '
+        elif i == 8:
+            # print('f')
+            notation += 'f '
+        elif i == 9:
+            # print('fp')
+            notation += 'fp '
+        elif i == 10:
+            # print('b')
+            notation += 'b '
+        elif i == 11:
+            # print('bp')
+            notation += 'bp '
+    return notation
